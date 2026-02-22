@@ -1,50 +1,99 @@
-# Welcome to your Expo app 👋
+# Frontend Mobile - Gestor de Actividades (Move & Lite)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicacion movil multiplataforma para gestionar actividades deportivas, reservas y perfil de usuario desde el telefono. Construida con React Native y Expo, con interfaz oscura y acentos turquesa, orientada a experiencia tactil.
 
-## Get started
+## Tecnologias
 
-1. Install dependencies
+- Framework: React Native 0.81 + Expo 54
+- Lenguaje: TypeScript 5.9
+- Navegacion: Expo Router 6 (file-based routing)
+- Navegacion nativa: React Navigation 7
+- Animaciones: React Native Reanimated 4
+- Linting: ESLint (eslint-config-expo)
 
-   ```bash
-   npm install
-   ```
+## Ejecucion
 
-2. Start the app
+### Requisitos previos
 
-   ```bash
-   npx expo start
-   ```
+- Node.js (LTS)
+- npm
+- Expo CLI via `npx expo`
+- Backend API activo y accesible desde el dispositivo/emulador
 
-In the output, you'll find options to open the app in a
+### Configuracion de red
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+La app consume la API definida en `Gimnasiomovil/lib/api.ts`.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Actualmente usa:
 
-## Get a fresh project
+- Android emulador: `http://10.0.2.2:3000`
+- iOS/Web y default: `http://localhost:3000`
 
-When you're ready, run:
+Si pruebas desde dispositivo fisico, cambia `API_BASE_URL` por la IP LAN de tu PC (por ejemplo `http://192.168.1.50:3000`).
+
+## Arranque
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Desde ahi puedes abrir la app en:
 
-## Learn more
+- `npm run android` - Emulador o dispositivo Android
+- `npm run ios` - Simulador iOS (solo macOS)
+- `npm run web` - Navegador (modo web)
 
-To learn more about developing your project with Expo, look at the following resources:
+## Pantallas de la aplicacion
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Autenticacion
 
-## Join the community
+- Login (`/`): acceso con `correo` y `contrasena`; guarda token en sesion de memoria y redirige a Principal.
+- Crear cuenta (`/crear-cuenta`): registro con nombre, apellido, correo, telefono y contrasena.
 
-Join our community of developers creating universal apps.
+### Panel principal
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Principal (`/principal`): listado de actividades, buscador, detalle y reserva de actividad.
+- Mis reservas (`/(tabs)/mis-reservas`): lista de actividades reservadas y cancelacion (permitida solo con mas de 15 minutos de anticipacion).
+- Detalle individual (`/actividad/[id]`): vista puntual de una actividad.
+
+### Funciones por rol
+
+- Usuario:
+  - Ver actividades.
+  - Reservar actividad disponible.
+  - Ver y cancelar reservas con restriccion horaria.
+
+- Admin (`rol === 'admin'`):
+  - Todo lo de usuario.
+  - Crear actividades.
+  - Modificar actividades.
+  - Eliminar actividades.
+
+## Estructura de rutas (Expo Router)
+
+- `app/index.tsx` - Login
+- `app/crear-cuenta.tsx` - Signup
+- `app/principal.tsx` - Dashboard principal (user/admin)
+- `app/(tabs)/index.tsx` - Redirect a principal
+- `app/(tabs)/mis-reservas.tsx` - Reservas del usuario
+- `app/actividad/[id].tsx` - Detalle de actividad
+
+## Integracion con API
+
+La app espera endpoints REST como:
+
+- `POST /auth/login`
+- `POST /usuarios`
+- `GET /actividades`
+- `GET /actividades/:id`
+- `POST /reservas`
+- `GET /reservas`
+- `DELETE /reservas`
+- `POST/PUT/DELETE /actividades` (admin)
+
+## Notas tecnicas
+
+- La sesion (`token` + `usuario`) se guarda en memoria (`lib/session.ts`).
+- Si se reinicia la app, la sesion actual se pierde (no hay persistencia local aun).
+- Las imagenes de actividades se resuelven desde assets locales o URL absoluta via `lib/imageSource.ts`.
