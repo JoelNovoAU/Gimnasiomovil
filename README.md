@@ -20,16 +20,6 @@ Aplicacion movil multiplataforma para gestionar actividades deportivas, reservas
 - Expo CLI via `npx expo`
 - Backend API activo y accesible desde el dispositivo/emulador
 
-### Configuracion de red
-
-La app consume la API definida en `Gimnasiomovil/lib/api.ts`.
-
-Actualmente usa:
-
-- Android emulador: `http://10.0.2.2:3000`
-- iOS/Web y default: `http://localhost:3000`
-
-Si pruebas desde dispositivo fisico, cambia `API_BASE_URL` por la IP LAN de tu PC (por ejemplo `http://192.168.1.50:3000`).
 
 ## Arranque
 
@@ -70,7 +60,7 @@ Desde ahi puedes abrir la app en:
   - Modificar actividades.
   - Eliminar actividades.
 
-## Estructura de rutas (Expo Router)
+## Estructura de rutas
 
 - `app/index.tsx` - Login
 - `app/crear-cuenta.tsx` - Signup
