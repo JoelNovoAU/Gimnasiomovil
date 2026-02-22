@@ -27,6 +27,7 @@ export default function TabLayout() {
         name="mis-reservas"
         options={{
           title: 'Reservas',
+          tabBarStyle: { display: 'none' },
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
         }}
       />

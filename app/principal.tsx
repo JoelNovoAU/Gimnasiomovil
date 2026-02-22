@@ -104,6 +104,7 @@ export default function PrincipalScreen() {
   const [nuevaHora, setNuevaHora] = useState('');
   const [nuevaMaximo, setNuevaMaximo] = useState('');
   const [mostrarCalendarioDia, setMostrarCalendarioDia] = useState(false);
+  const [mostrarSelectorHora, setMostrarSelectorHora] = useState(false);
   const [mesCalendario, setMesCalendario] = useState(() => {
     const hoy = new Date();
     return new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -259,6 +260,7 @@ export default function PrincipalScreen() {
     const hoy = new Date();
     setMesCalendario(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
     setMostrarCalendarioDia(false);
+    setMostrarSelectorHora(false);
     setMostrarModalCrear(true);
   };
 
@@ -281,12 +283,14 @@ export default function PrincipalScreen() {
     const base = fechaEditada || new Date();
     setMesCalendario(new Date(base.getFullYear(), base.getMonth(), 1));
     setMostrarCalendarioDia(false);
+    setMostrarSelectorHora(false);
     setMostrarModalCrear(true);
   };
 
   const cerrarModalCrear = () => {
     if (creando) return;
     setMostrarCalendarioDia(false);
+    setMostrarSelectorHora(false);
     setMostrarModalCrear(false);
   };
 
@@ -299,6 +303,17 @@ export default function PrincipalScreen() {
     setNuevaDia(formatearFechaISO(fechaSeleccionada));
     setMostrarCalendarioDia(false);
   };
+
+  const HORAS_DISPONIBLES = useMemo(
+    () => Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')),
+    []
+  );
+  const MINUTOS_DISPONIBLES = useMemo(
+    () => Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')),
+    []
+  );
+  const horaSeleccionada = nuevaHora.includes(':') ? nuevaHora.split(':')[0] : '';
+  const minutoSeleccionado = nuevaHora.includes(':') ? nuevaHora.split(':')[1] : '';
 
   const guardarActividad = async () => {
     setMsgCrear('');
@@ -627,7 +642,10 @@ export default function PrincipalScreen() {
                 placeholderTextColor="#8f97a2"
               />
               <Pressable
-                onPress={() => setMostrarCalendarioDia((prev) => !prev)}
+                onPress={() => {
+                  setMostrarSelectorHora(false);
+                  setMostrarCalendarioDia((prev) => !prev);
+                }}
                 style={[styles.formInput, styles.dateInputButton]}>
                 <Text style={nuevaDia ? styles.dateInputText : styles.dateInputPlaceholder}>
                   {nuevaDia || 'Dia (YYYY-MM-DD)'}
@@ -679,13 +697,59 @@ export default function PrincipalScreen() {
                   </View>
                 </View>
               )}
-              <TextInput
-                value={nuevaHora}
-                onChangeText={setNuevaHora}
-                style={styles.formInput}
-                placeholder="Hora (HH:mm)"
-                placeholderTextColor="#8f97a2"
-              />
+              <Pressable
+                onPress={() => {
+                  setMostrarCalendarioDia(false);
+                  setMostrarSelectorHora((prev) => !prev);
+                }}
+                style={[styles.formInput, styles.dateInputButton]}>
+                <Text style={nuevaHora ? styles.dateInputText : styles.dateInputPlaceholder}>
+                  {nuevaHora || 'Hora (HH:mm)'}
+                </Text>
+              </Pressable>
+              {mostrarSelectorHora && (
+                <View style={styles.timeDropdown}>
+                  <View style={styles.timeColumns}>
+                    <ScrollView style={styles.timeColumn} showsVerticalScrollIndicator={false}>
+                      {HORAS_DISPONIBLES.map((hora) => {
+                        const seleccionado = hora === horaSeleccionada;
+                        return (
+                          <Pressable
+                            key={hora}
+                            onPress={() => {
+                              const minuto = minutoSeleccionado || '00';
+                              setNuevaHora(`${hora}:${minuto}`);
+                            }}
+                            style={[styles.timeOption, seleccionado && styles.timeOptionSelected]}>
+                            <Text style={[styles.timeOptionText, seleccionado && styles.timeOptionTextSelected]}>
+                              {hora}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                    <ScrollView style={styles.timeColumn} showsVerticalScrollIndicator={false}>
+                      {MINUTOS_DISPONIBLES.map((minuto) => {
+                        const seleccionado = minuto === minutoSeleccionado;
+                        return (
+                          <Pressable
+                            key={minuto}
+                            onPress={() => {
+                              const hora = horaSeleccionada || '00';
+                              setNuevaHora(`${hora}:${minuto}`);
+                              setMostrarSelectorHora(false);
+                            }}
+                            style={[styles.timeOption, seleccionado && styles.timeOptionSelected]}>
+                            <Text style={[styles.timeOptionText, seleccionado && styles.timeOptionTextSelected]}>
+                              {minuto}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                </View>
+              )}
               <TextInput
                 value={nuevaMaximo}
                 onChangeText={setNuevaMaximo}
@@ -1001,4 +1065,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   secondaryFormButtonText: { color: '#f2f5f7', fontWeight: '700' },
+  timeDropdown: {
+    marginTop: -2,
+    marginBottom: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2a323d',
+    backgroundColor: '#131920',
+    maxHeight: 180,
+  },
+  timeColumns: { flexDirection: 'row' },
+  timeColumn: { flex: 1 },
+  timeOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1f2731',
+  },
+  timeOptionSelected: { backgroundColor: 'rgba(44,184,175,0.18)' },
+  timeOptionText: { color: '#f2f5f7', fontSize: 14 },
+  timeOptionTextSelected: { color: '#7ed8d2', fontWeight: '800' },
 });
